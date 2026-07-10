@@ -1,0 +1,45 @@
+# Version control
+.git
+.gitignore
+
+# Build artifacts
+fronted/dist/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Dependencies (installed inside containers)
+fronted/node_modules/
+backend/venv/
+
+# IDE / editor config
+.vscode/
+.idea/
+
+# Secrets — must be injected at runtime, not baked into images
+backend/.env
+fronted/.env
+
+# Runtime state (SQLite checkpoints)
+backend/langgraph_checkpoints.sqlite
+backend/langgraph_checkpoints.sqlite-shm
+backend/langgraph_checkpoints.sqlite-wal
+
+# macOS metadata
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Python version pin (containers have their own Python)
+backend/.python-version
+
+# CodeFlicker / AI tooling internal
+.codeflicker/
+backend/.codeflicker/
+
+# Documentation / non-deploy files
+*.md
+fronted/README.md

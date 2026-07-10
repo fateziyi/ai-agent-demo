@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    container_name: ai-agent-backend
+    # 密钥通过环境变量注入，不打包进镜像
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-qwen}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+      - QWEN_MODEL=${QWEN_MODEL:-qwen-plus}
+      - QWEN_BASE_URL=${QWEN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-opus-4-6}
+      - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-}
+      - REDIS_URL=redis://redis:6379/0
+      # LangSmith 可观测性追踪
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING:-true}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-ai-agent-project}
+    ports:
+      - "8000:8000"
+    volumes:
+      # 持久化 SQLite 检查点数据库（容器重启后数据不丢失）
+      - backend-checkpoints:/app/checkpoints
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-agent-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./fronted
+      dockerfile: Containerfile
+    container_name: ai-agent-frontend
+    environment:
+      # nginx 反向代理将 /chat 转发到 backend 服务
+      - BACKEND_URL=http://backend:8000
+    ports:
+      # 8080 避免rootless模式下的特权端口限制
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  backend-checkpoints:
+    driver: local
+  redis_data:
+    driver: local

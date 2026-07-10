@@ -1,0 +1,31 @@
+# Secrets — NEVER commit
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+
+# Node
+node_modules/
+dist/
+
+# SQLite runtime state
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# CodeFlicker / AI tooling
+.codeflicker/

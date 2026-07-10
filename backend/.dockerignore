@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+
+# Python bytecode and caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Local virtual environment
+venv/
+
+# IDE / editor config
+.vscode/
+.idea/
+
+# Secrets — must be injected via runtime env vars, not baked into image
+.env
+
+# SQLite checkpoint databases — runtime state, not build artifacts
+langgraph_checkpoints.sqlite
+langgraph_checkpoints.sqlite-shm
+langgraph_checkpoints.sqlite-wal
+
+# macOS metadata
+.DS_Store
+
+# Logs
+*.log
+
+# Python version file (container has its own Python)
+.python-version
+
+# CodeFlicker internal
+.codeflicker/
